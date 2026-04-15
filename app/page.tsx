@@ -83,14 +83,14 @@ export default function Home() {
           </p>
           <button
             onClick={handleClaimClick}
-            className="bg-[#FFC0CB] hover:bg-[#FFB6C1] text-slate-950 font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-[0_0_20px_rgba(255,192,203,0.3)] animate-bounce transition-transform hover:scale-105 active:scale-95"
+            className="bg-[#FFC0CB] hover:bg-[#FFB6C1] hover:cursor-pointer text-slate-950 font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-[0_0_20px_rgba(255,192,203,0.3)] animate-bounce transition-transform hover:scale-105 active:scale-95"
           >
             Claim now
           </button>
         </main>
       ) : (
-        <div className="flex flex-col items-center justify-center animate-wheel-in w-full h-full max-h-screen p-4 overflow-hidden gap-8">
-          <div className="w-full text-center hidden portrait:block">
+        <div className="flex flex-col items-center justify-center w-full h-full max-h-screen p-4 overflow-hidden gap-8">
+          <div className="w-full text-center hidden portrait:block animate-wheel-in">
             <h2 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,182,193,0.5)] bg-clip-text text-transparent bg-gradient-to-r from-pink-100 via-white to-pink-100 sm:whitespace-nowrap">
               Welcome to fortune wheel!
             </h2>

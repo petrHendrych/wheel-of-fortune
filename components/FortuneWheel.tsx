@@ -56,12 +56,12 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
   }, [isSpinning, innaIndex, rotation, onSpinEnd]);
 
   if (!isVisible) return null;
-
+  
   return (
-    <div className="relative w-[80vmin] h-[80vmin] sm:w-[85vmin] sm:h-[85vmin] max-w-full max-h-full flex items-center justify-center animate-wheel-in transition-transform duration-500 ease-out">
+    <div className="relative w-[80vmin] h-[80vmin] sm:w-[85vmin] sm:h-[85vmin] max-w-full max-h-full flex items-center justify-center transition-transform duration-500 ease-out">
       <svg
         viewBox="0 0 100 100"
-        className="w-full h-full rounded-full shadow-2xl border-4 border-white/20"
+        className="w-full h-full rounded-full shadow-2xl border-4 border-white/20 animate-wheel-in"
       >
         <defs>
           <filter id="inset-shadow" x="-50%" y="-50%" width="200%" height="200%">
@@ -80,8 +80,11 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
           </filter>
         </defs>
         <g 
-          transform={`rotate(${-90 + rotation} 50 50)`}
           className="transition-transform duration-[5s] ease-[cubic-bezier(0.1,0,0,1)]"
+          style={{ 
+            transform: `rotate(${-90 + rotation}deg)`,
+            transformOrigin: "50px 50px" 
+          }}
         >
           {Array.from({ length: segments }).map((_, i) => {
             const angle = 360 / segments;
