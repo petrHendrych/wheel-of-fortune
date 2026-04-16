@@ -24,9 +24,6 @@ export default function Home() {
 
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, gravity: 0.5 };
 
-    const randomInRange = (min: number, max: number) =>
-      Math.random() * (max - min) + min;
-
     const interval: any = setInterval(function () {
       // pastel colors
       const colors = ["#FFD1DC", "#FFB6C1", "#FFC0CB", "#E6E6FA", "#B0E0E6", "#F0FFF0"];
@@ -106,13 +103,69 @@ export default function Home() {
 
       {winResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-4 md:p-10">
-          <div className="bg-slate-900/90 backdrop-blur-md border-2 border-pink-500/50 p-10 md:p-20 rounded-[3rem] shadow-[0_0_50px_rgba(236,72,153,0.3)] animate-win-popup pointer-events-auto w-fit max-w-full text-center mx-auto">
-            <h3 className="font-playfair text-5xl md:text-7xl lg:text-8xl font-black text-white mb-4 drop-shadow-[0_0_15px_rgba(255,182,193,0.8)] bg-clip-text text-transparent bg-gradient-to-r from-pink-300 via-white to-pink-300 leading-tight whitespace-nowrap">
-              {winResult}
-            </h3>
-            <p className="text-pink-100 text-xl md:text-2xl mt-4 font-medium opacity-80">
-              Congratulations on your amazing prize! Tickets will be handed to you shortly.
-            </p>
+          <div className="relative animate-win-popup pointer-events-auto w-fit max-w-full flex flex-col md:flex-row shadow-[0_0_50px_rgba(236,72,153,0.3)]">
+            {/* Main Info Section (80%) */}
+            <div className="relative bg-white text-slate-900 p-8 md:p-10 rounded-t-3xl md:rounded-tr-none md:rounded-l-3xl flex-grow flex flex-col items-center text-center justify-between min-w-[320px] md:min-w-[800px] overflow-hidden group">
+              {/* Half circle cutouts (right side - divider counterpart) */}
+              <div className="absolute top-0 -right-4 w-8 h-8 bg-slate-950 rounded-full hidden md:block z-20"></div>
+              <div className="absolute bottom-0 -right-4 w-8 h-8 bg-slate-950 rounded-full hidden md:block z-20"></div>
+              
+              <div className="relative z-10 w-full">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="text-xs font-black uppercase tracking-[0.3em] text-pink-600">Concert Ticket</span>
+                  <span className="text-xs font-mono text-slate-400">#2026-INNA-BRNO</span>
+                </div>
+                
+                <h3 className="font-playfair text-7xl md:text-9xl font-black text-slate-900 mb-2 leading-none">
+                  INNA
+                </h3>
+                <p className="text-xl md:text-2xl font-bold text-pink-500 uppercase tracking-widest mb-6">
+                  Live in Concert
+                </p>
+              </div>
+
+              <div className="relative z-10 flex flex-wrap justify-center gap-12 md:gap-20 pt-6 border-t border-slate-100 w-full">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Date</span>
+                  <span className="text-lg md:text-xl font-bold font-mono">25.4.2026</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Place</span>
+                  <span className="text-lg md:text-xl font-bold font-mono">BVV Brno</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Type</span>
+                  <span className="text-lg md:text-xl font-bold font-mono">VIP Access</span>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-pink-100 rounded-full opacity-50 blur-3xl"></div>
+            </div>
+
+            {/* Divider with dashed line (visual only) */}
+            <div className="relative hidden md:flex flex-col items-center justify-between py-4 bg-white border-l-2 border-dashed border-slate-200 w-0">
+            </div>
+
+            {/* Scanning Section (20%) */}
+            <div className="relative bg-slate-50 p-8 md:w-80 rounded-b-3xl md:rounded-bl-none md:rounded-r-3xl flex flex-col items-center justify-center border-t-2 border-dashed border-slate-200 md:border-t-0 overflow-hidden">
+              {/* Half circle cutouts (top side - mobile) */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 w-8 h-8 bg-slate-950 rounded-full md:hidden z-20"></div>
+              
+              {/* Half circle cutouts (left side - desktop divider counterpart) */}
+              <div className="absolute top-0 -left-4 w-8 h-8 bg-slate-950 rounded-full hidden md:block z-20"></div>
+              <div className="absolute bottom-0 -left-4 w-8 h-8 bg-slate-950 rounded-full hidden md:block z-20"></div>
+
+              <div className="w-full aspect-square bg-white p-4 shadow-inner mb-6 flex items-center justify-center border border-slate-200 rounded-xl">
+                {/* Mock QR Code */}
+                <div className="grid grid-cols-6 grid-rows-6 gap-0.5 w-full h-full opacity-80">
+                  {Array.from({ length: 36 }).map((_, i) => (
+                    <div key={i} className={`w-full h-full ${Math.random() > 0.4 ? 'bg-slate-900' : 'bg-transparent'}`}></div>
+                  ))}
+                </div>
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.2em] font-bold">SCAN FOR ENTRY</span>
+            </div>
           </div>
         </div>
       )}
