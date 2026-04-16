@@ -5,14 +5,14 @@ import React, { useMemo, useState, useCallback } from "react";
 interface FortuneWheelProps {
   isVisible: boolean;
   onSpinEnd?: (prize: string) => void;
+  onSpinStart?: () => void;
 }
 
-const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => {
+const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd, onSpinStart }) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
 
   const segments = 24;
-  const colors = ["#FFC0CB", "#FFF44F"]; // Baby Pink and Light Limoncelo Yellow
   
   const randomTexts = useMemo(() => {
     const texts = [
@@ -25,6 +25,7 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
     // Fill up to 24 segments
     const fullList = Array.from({ length: segments }, (_, i) => texts[i % texts.length]);
     // Shuffle the list to make "INNA" (and others) appear in a random tile
+    // eslint-disable-next-line react-hooks/purity
     return fullList.sort(() => Math.random() - 0.5);
   }, []);
 
@@ -36,6 +37,7 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
     // We don't need to manually set isSpinning for the transition to work anymore,
     // but it's still useful to prevent multiple clicks and potentially for UI state.
     setIsSpinning(true);
+    if (onSpinStart) onSpinStart();
     
     const segmentAngle = 360 / segments;
     const targetOffset = 360 - (innaIndex * segmentAngle + segmentAngle / 2);
@@ -53,7 +55,7 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
         onSpinEnd("INNA concert tickets");
       }
     }, 5000);
-  }, [isSpinning, innaIndex, rotation, onSpinEnd]);
+  }, [isSpinning, innaIndex, rotation, onSpinEnd, onSpinStart]);
 
   if (!isVisible) return null;
   
@@ -61,9 +63,19 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
     <div className="relative w-[80vmin] h-[80vmin] sm:w-[85vmin] sm:h-[85vmin] max-w-full max-h-full flex items-center justify-center transition-transform duration-500 ease-out">
       <svg
         viewBox="0 0 100 100"
-        className="w-full h-full rounded-full shadow-2xl border-4 border-white/20 animate-wheel-in"
+        className="w-full h-full rounded-full shadow-[0_0_50px_rgba(255,215,0,0.3)] border-4 border-white/20 animate-wheel-in"
       >
         <defs>
+          <radialGradient id="segment-grad-0" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFFACD" />
+            <stop offset="70%" stopColor="#FFD700" />
+            <stop offset="100%" stopColor="#B8860B" />
+          </radialGradient>
+          <radialGradient id="segment-grad-1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFB6C1" />
+            <stop offset="70%" stopColor="#FF69B4" />
+            <stop offset="100%" stopColor="#C71585" />
+          </radialGradient>
           <filter id="inset-shadow" x="-50%" y="-50%" width="200%" height="200%">
             <feComponentTransfer in="SourceAlpha">
               <feFuncA type="table" tableValues="1 0" />
@@ -104,9 +116,9 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
               <g key={i}>
                 <path
                   d={pathData}
-                  fill={colors[i % 2]}
-                  stroke="rgba(0,0,0,0.1)"
-                  strokeWidth="0.2"
+                  fill={`url(#segment-grad-${i % 2})`}
+                  stroke="rgba(255,255,255,0.3)"
+                  strokeWidth="0.3"
                 />
                 <g transform={`rotate(${startAngle + angle / 2} 50 50)`}>
                   <text
@@ -127,9 +139,33 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
             );
           })}
         </g>
+        
+        {/* Shine overlay that sweeps across the wheel */}
+        <g 
+          className="animate-shine-sweep pointer-events-none"
+          style={{ transformOrigin: "50px 50px" }}
+        >
+          <rect 
+            x="0" y="0" width="100" height="100" 
+            fill="url(#shine-gradient)" 
+            clipPath="url(#wheel-clip)"
+          />
+        </g>
+
+        <defs>
+          <linearGradient id="shine-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="white" stopOpacity="0" />
+            <stop offset="50%" stopColor="white" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
+          </linearGradient>
+          <clipPath id="wheel-clip">
+            <circle cx="50" cy="50" r="50" />
+          </clipPath>
+        </defs>
+
         {/* Center SPIN Button */}
         <g 
-          className={`transition-transform duration-150 ${isSpinning ? 'pointer-events-none opacity-80' : 'cursor-pointer hover:scale-110 active:scale-95'}`}
+          className={`transition-transform duration-150 animate-glow-pulse ${isSpinning ? 'pointer-events-none opacity-80' : 'cursor-pointer hover:scale-110 active:scale-95'}`}
           style={{ 
             transformOrigin: "50px 50px", 
             filter: "url(#inset-shadow)" 
@@ -140,8 +176,8 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
             cx="50" 
             cy="50" 
             r="9" 
-            fill="#A52A2A" 
-            stroke="white" 
+            fill="#800020" 
+            stroke="#FFD700" 
             strokeWidth="1.2"
           />
           <text
@@ -161,8 +197,8 @@ const FortuneWheel: React.FC<FortuneWheelProps> = ({ isVisible, onSpinEnd }) => 
         </g>
       </svg>
       {/* Pointer */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 z-10">
-        <svg viewBox="0 0 24 24" fill="white" className="drop-shadow-md">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 z-10 animate-glow-pulse">
+        <svg viewBox="0 0 24 24" fill="#FFD700" className="drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]">
           <path d="M12 21l-8-14h16l-8 14z" />
         </svg>
       </div>

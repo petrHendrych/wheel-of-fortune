@@ -10,6 +10,8 @@ export default function Home() {
   const [showWheel, setShowWheel] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [winResult, setWinResult] = useState<string | null>(null);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [auras, setAuras] = useState<{ id: number; top: string; left: string; color: string }[]>([]);
 
   const sparkles = [
     { top: "10%", left: "10%", delay: "0s" },
@@ -25,7 +27,7 @@ export default function Home() {
 
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, gravity: 0.5 };
 
-    const interval: any = setInterval(function () {
+    const interval: ReturnType<typeof setInterval> = setInterval(function () {
       // pastel colors
       const colors = ["#FFD1DC", "#FFB6C1", "#FFC0CB", "#E6E6FA", "#B0E0E6", "#F0FFF0"];
 
@@ -41,6 +43,28 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [isPartyActive, winResult]);
 
+  useEffect(() => {
+    if (!isSpinning) return;
+
+    const auraInterval = setInterval(() => {
+      const newAura = {
+        id: Date.now(),
+        top: `${Math.random() * 80 + 10}%`,
+        left: `${Math.random() * 80 + 10}%`,
+        color: ["#FFD700", "#FF69B4", "#C71585", "#FFD1DC"][Math.floor(Math.random() * 4)],
+      };
+      
+      setAuras(prev => [...prev.slice(-15), newAura]);
+      
+      // Clean up old aura after its animation duration (4s)
+      setTimeout(() => {
+        setAuras(prev => prev.filter(a => a.id !== newAura.id));
+      }, 4000);
+    }, 200);
+
+    return () => clearInterval(auraInterval);
+  }, [isSpinning]);
+
   const handleClaimClick = () => {
     setIsTransitioning(true);
     setIsPartyActive(false);
@@ -53,9 +77,26 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen h-screen flex-col items-center justify-center bg-slate-950 px-4 text-center overflow-hidden">
+    <div className="flex min-h-screen h-screen flex-col items-center justify-center bg-slate-950 px-8 text-center overflow-hidden">
+      {/* Background Aura Effects during spinning */}
+      {isSpinning && auras.map(aura => (
+        <div
+          key={aura.id}
+          className="absolute animate-aura-pulse rounded-full pointer-events-none z-0"
+          style={{
+            top: aura.top,
+            left: aura.left,
+            width: '300px',
+            height: '300px',
+            backgroundColor: aura.color,
+            filter: 'blur(100px)',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      ))}
+      
       {!showWheel ? (
-        <main className={`flex flex-col items-center justify-center mb-24 max-w-[90vw] relative transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        <main className={`flex flex-col items-center justify-center mb-24 w-full max-w-full px-4 relative transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
           <div className="relative">
             {isPartyActive && sparkles.map((s, i) => (
               <div
@@ -87,8 +128,8 @@ export default function Home() {
           </button>
         </main>
       ) : (
-        <div className="flex flex-col items-center justify-center w-full h-full max-h-screen p-4 overflow-hidden gap-8">
-          <div className="w-full text-center hidden portrait:block animate-wheel-in">
+        <div className={`flex flex-col items-center justify-center w-full h-full max-h-screen p-4 overflow-hidden gap-8 transition-opacity duration-700 ${winResult ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="w-full text-center hidden portrait:block animate-wheel-in px-4">
             <h2 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,182,193,0.5)] bg-clip-text text-transparent bg-gradient-to-r from-pink-100 via-white to-pink-100 sm:whitespace-nowrap">
               Welcome to fortune wheel!
             </h2>
@@ -97,23 +138,38 @@ export default function Home() {
             </p>
           </div>
           <div className="flex-shrink-0 flex items-center justify-center pb-8 max-h-full">
-            <FortuneWheel isVisible={showWheel} onSpinEnd={setWinResult} />
+            <FortuneWheel 
+              isVisible={showWheel} 
+              onSpinStart={() => setIsSpinning(true)}
+              onSpinEnd={(prize) => {
+                setWinResult(prize);
+                setIsSpinning(false);
+                setAuras([]);
+              }} 
+            />
           </div>
         </div>
       )}
 
       {winResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-4 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none p-4 overflow-hidden">
+          {/* Top text for all resolutions - centered above tickets */}
+          <div className="animate-win-popup px-4 mb-4 md:mb-16 lg:mb-24">
+            <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,182,193,0.5)] text-center leading-tight">
+              Congratulations, you <span className="animate-rgb-breath">WON</span>!
+            </h2>
+          </div>
+          
           <div className="relative flex items-center justify-center w-full max-w-full">
             {/* Background Ticket Wrapper - handles stacking offset */}
-            <div className="absolute transform translate-x-24 -translate-y-20 z-0">
+            <div className="absolute z-0 transform translate-x-12 -translate-y-12 landscape:md:translate-x-12 landscape:md:-translate-y-12 portrait:translate-x-0 portrait:translate-y-12 transition-transform duration-500">
               <Ticket 
                 title="INNA" 
                 date="25.4.2026" 
                 location="BVV Brno" 
                 type="Basic"
                 id="2026-INNA-BACK" 
-                className="scale-90 -rotate-8"
+                className="scale-90 -rotate-6 portrait:rotate-0"
               />
             </div>
             {/* Main Ticket Wrapper */}
@@ -124,7 +180,7 @@ export default function Home() {
                 location="BVV Brno" 
                 type="Basic"
                 id="2026-INNA-BRNO" 
-                className="scale-90 md:scale-100"
+                className="scale-[0.85] sm:scale-90 md:landscape:scale-100"
               />
             </div>
           </div>
